@@ -7,16 +7,7 @@ export class AuthorizationMiddleware implements IMiddleware {
   handle({ metadata }: IRequest): IMiddlewareResult {
     const role = metadata?.account?.role;
 
-    if (!role) {
-      return {
-        statusCode: 403,
-        body: {
-          error: 'Access Denied.',
-        },
-      };
-    }
-
-    if (!this.allowedRoles.includes(role as Role)) {
+    if (!role || !this.allowedRoles.includes(role as Role)) {
       return {
         statusCode: 403,
         body: {
