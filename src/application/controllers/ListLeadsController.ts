@@ -1,4 +1,4 @@
-import { IController, IResponse } from '../interfaces/IController';
+import { IController, IResponse } from '../interfaces/http';
 
 export class ListLeadsController implements IController {
   async handle(): Promise<IResponse> {
