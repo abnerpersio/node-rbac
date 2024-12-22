@@ -1,13 +1,34 @@
-import { Role } from '@prisma/client';
+import { PermissionCode } from '../config/constants/permission';
 import { IMiddleware, IMiddlewareResult, IRequest } from '../interfaces/http';
+import { GetRolePermissionsUseCase } from '../useCases/GetRolePermissionsUseCase';
 
 export class AuthorizationMiddleware implements IMiddleware {
-  constructor(private readonly allowedRoles: Role[]) {}
+  constructor(
+    private readonly requiredCodes: PermissionCode[],
+    private readonly getRolePermissionsUseCase: GetRolePermissionsUseCase
+  ) {}
 
-  handle({ metadata }: IRequest): IMiddlewareResult {
-    const role = metadata?.account?.role;
+  async handle({ metadata }: IRequest): Promise<IMiddlewareResult> {
+    const roleId = metadata?.account?.roleId;
 
-    if (!role || !this.allowedRoles.includes(role as Role)) {
+    if (!roleId) {
+      return {
+        statusCode: 403,
+        body: {
+          error: 'Access Denied.',
+        },
+      };
+    }
+
+    const { permissionsCodes } = await this.getRolePermissionsUseCase.execute({
+      roleId,
+    });
+
+    const isAllowed = this.requiredCodes.some((code) =>
+      permissionsCodes.includes(code)
+    );
+
+    if (!isAllowed) {
       return {
         statusCode: 403,
         body: {

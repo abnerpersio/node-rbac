@@ -2,7 +2,7 @@ import express from 'express';
 
 import { routeAdapter } from './adapters/routeAdapter';
 
-import { Role } from '@prisma/client';
+import { PERMISSION_CODES } from '../application/config/constants/permission';
 import { makeAuthenticationMiddleware } from '../factories/makeAuthenticationMiddleware';
 import { makeAuthorizationMiddleware } from '../factories/makeAuthorizationMiddleware';
 import { makeListLeadsController } from '../factories/makeListLeadsController';
@@ -20,13 +20,16 @@ app.post('/sign-in', routeAdapter(makeSignInController()));
 app.get(
   '/leads',
   middlewareAdapter(makeAuthenticationMiddleware()),
+  middlewareAdapter(makeAuthorizationMiddleware([PERMISSION_CODES.LEADS_READ])),
   routeAdapter(makeListLeadsController())
 );
 
 app.post(
   '/leads',
   middlewareAdapter(makeAuthenticationMiddleware()),
-  middlewareAdapter(makeAuthorizationMiddleware([Role.ADMIN])),
+  middlewareAdapter(
+    makeAuthorizationMiddleware([PERMISSION_CODES.LEADS_WRITE])
+  ),
   (_, res) => res.sendStatus(201)
 );
 

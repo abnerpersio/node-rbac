@@ -28,7 +28,7 @@ export class AuthenticationMiddleware implements IMiddleware {
         metadata: {
           account: {
             id: payload.sub,
-            role: payload.role,
+            roleId: payload.roleId,
           },
         },
       };
